@@ -20,14 +20,9 @@
   shift @left,
   loop,
   rel @left,
-  satisfies,
   equal @left,
-  bitOr @left,
-  bitXor @left,
-  bitAnd @left,
   and @left,
   or @left,
-  ternary @right,
   assign @right,
   comma @left,
   statement @cut,
@@ -37,20 +32,22 @@
 @top Script { ProgramDefinition }
 
 ProgramDefinition[@isGroup=Program]{
-  proceso ProgramName
-  Body
+  ProgramHeader { proceso ProgramName { identifier }}
+    Block
   finproceso
 }
 
-Body { statement+ }
+Block {
+  statements*
+}
 
-statement[@isGroup=Statement] {
-  (simpleStatement | compoundStatement)
+statements[@isGroup=Statement] {
+  simpleStatement
 }
 
 simpleStatement {
   DefineStatement {
-    definir commaSep<VariableDefinition{VariableName}> como VariableType semi
+    definir Variables { commaSep<VariableDefinition{VariableName}> } como VariableType semi
   } |
   WriteStatement {
     escribir commaSep<String | VariableName> semi
@@ -59,29 +56,6 @@ simpleStatement {
     leer commaSep<VariableName> semi
   } |
   ExpressionStatement { expression semi }
-
-}
-
-compoundStatement {
-  IfStatement {
-    si expression entonces
-    Body
-    (!else sino Body)?
-    finsi
-  } |
-  SwitchStatement {
-    segun expression hacer
-    SwitchBody {
-      switchItem*
-    }
-    finsegun
-  }
-}
-
-switchItem {
-  CaseLabel { expression ":" } |
-  (DefaultLabel { "De otro modo" } ":") |
-  statement
 }
 
 expression[@isGroup=Expression] {
@@ -92,118 +66,30 @@ expression[@isGroup=Expression] {
   ParenthesizedExpression
 }
 
-ParenthesizedExpression { "(" expression ")" }
-
 BinaryExpression {
   expression !plus ArithOp<"+" | "-"> expression |
-  expression !times divide | mod | intDivide | ArithOp<"*"> expression|
+  expression !times (ArithOp<"*"|"/"> | div | mod) expression|
   expression !exp ArithOp<"**"|'^'> expression |
-  expression !equal CompareOp<"=" | "!="> expression |
-  expression !rel (LessThan | CompareOp<"≤" | ">" | "≥">) expression |
-  expression !and LogicOp<"Y"> expression |
-  expression !or LogicOp<"O"> expression
+  expression !equal CompareOp<"=" | "≠"> expression |
+  expression !rel (CompareOp<"<" | "≤" | ">" | "≥">) expression |
+  expression !and LogicOp<"Y"|"y"> expression |
+  expression !or LogicOp<"O"|"o"> expression
 }
 
 AssignmentExpression {
   VariableName !assign "←" expression
 }
 
-ArrayExpression { "[" commaSep<expression>? "]" }
+ParenthesizedExpression { "(" expression ")" }
 
-
-ProgramName { identifier }
-
-VariableName { identifier }
+VariableName {
+  identifier
+}
 
 VariableType {
   entero | real | logico | cadena | caracter
 }
 
-@skip { spaces | newline | LineComment }
-kw<term> { @specialize[@name={term}]<identifier, term> }
-
-commaSep<expr> { expr ("," expr)* ","? }
-
-@tokens {
-  spaces[@export] { $[\u0009 \u000b\u00a0\u1680\u2000-\u200a\u202f\u205f\u3000\ufeff]+ }
-  newline[@export] { $[\r\n\u2028\u2029] }
-
-  LineComment { ("//" | '#') ![\n]* }
-
-  divide[@name=ArithOp] { "/" }
-
-  intDivide[@name=ArithOp] { "div" }
-  mod[@name=ArithOp] {"mod"}
-
-
-  @precedence { "/", LineComment, divide }
-  @precedence { "div", identifier, intDivide }
-  @precedence { "mod", identifier, mod }
-
-  identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
-
-  word { identifierChar (identifierChar | @digit)* }
-
-  identifier { word }
-
-  privateIdentifier { "#" word }
-
-  @precedence { spaces, newline, identifier }
-
-  @precedence { spaces, newline }
-
-  @precedence { spaces, newline, word }
-
-  @precedence { "De otro modo", identifier }
-
-  hex { @digit | $[a-fA-F] }
-
-  Number {
-    (@digit ("_" | @digit)* ("." ("_" | @digit)*)? | "." @digit ("_" | @digit)*)
-      (("e" | "E") ("+" | "-")? ("_" | @digit)+)? |
-    @digit ("_" | @digit)* "n" |
-    "0x" (hex | "_")+ "n"? |
-    "0b" $[01_]+ "n"? |
-    "0o" $[0-7_]+ "n"?
-  }
-
-  @precedence { Number "." }
-
-  Escape {
-    "\\" ("x" hex hex | "u" ("{" hex+ "}" | hex hex hex hex) | ![xu])
-  }
-
-  stringContentSingle { ![\\\n']+ }
-
-  stringContentDouble { ![\\\n"]+ }
-
-  templateStart { "`" }
-
-  InterpolationEnd[openedBy=InterpolationStart] { "}" }
-
-  ArithOp<expr> { expr }
-  LogicOp<expr> { expr }
-  BitOp<expr> { expr }
-  CompareOp<expr> { expr }
-  UpdateOp<expr> { expr }
-
-  RegExp { "/" (![/\\\n[] | "\\" ![\n] | "[" (![\n\\\]] | "\\" ![\n])* "]")+ ("/" $[gimsuy]*)? }
-
-  LessThan[@name=CompareOp] { "<" }
-
-  "←"[@name=Equals]
-
-  @precedence { "←", Equals, identifier}
-  @precedence { CompareOp, identifier}
-  @precedence { LogicOp, identifier}
-
-  "..."[@name=Spread]
-  "=>"[@name=Arrow]
-
-  "(" ")" "[" "]" "{" "}" ">" "≥"
-
-  "?." "." "," ";" ":" "@" "Y" "O"
-}
 
 @skip {} {
   String {
@@ -212,9 +98,43 @@ commaSep<expr> { expr ("," expr)* ","? }
   }
 }
 
-semi { ";" }
+semi {
+  ";"
+}
 
-@external propSource stepcodeHighlight from "./highlight"
+@skip { spaces | newline | Comment }
+
+commaSep<expr> { expr ("," expr)* ","? }
+
+@tokens {
+  spaces { @whitespace+ }
+  newline[@export] { $[\r\n\u2028\u2029] }
+  Comment { ("//" | '#') ![\n]* }
+  identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
+  word { identifierChar (identifierChar | @digit)* }
+  identifier { word }
+  @precedence { spaces, newline, identifier }
+  @precedence { spaces, newline, word }
+
+  Number {
+    (@digit ("_" | @digit)* ("." ("_" | @digit)*)? | "." @digit ("_" | @digit)*)
+      (("e" | "E") ("+" | "-")? ("_" | @digit)+)?
+  }
+  @precedence { Number "." }
+
+  stringContentSingle { ![\\\n']+ }
+
+  stringContentDouble { ![\\\n"]+ }
+
+  ArithOp<expr> { expr }
+  LogicOp<expr> { expr }
+  CompareOp<expr> { expr }
+
+  @precedence { ArithOp, Comment }
+  @precedence { LogicOp, identifier }
+  @precedence { CompareOp, identifier}
+  @precedence { "←", identifier }
+}
 
 
 @external specialize {identifier} keywords from "./tokens" {
@@ -223,5 +143,6 @@ semi { ";" }
     escribir[@name=escribir], leer[@name=leer],
     si[@name=si], entonces[@name=entonces], finsi[@name=finsi], sino[@name=sino],
     segun[@name=segun], hacer[@name=hacer], finsegun[@name=finsegun],
-    entero[@name=entero], real[@name=real], logico[@name=logico], cadena[@name=cadena], caracter[@name=caracter]
+    entero[@name=entero], real[@name=real], logico[@name=logico], cadena[@name=cadena], caracter[@name=caracter],
+    mod[@name=ArithOp], div[@name=ArithOp]
 }

@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "lezer-generator src/stepcode.grammar -o src/parser && rollup -c",
+    "build": "lezer-generator src/stepcode.0.grammar -o src/parser && rollup -c",
     "prepare": "npm run build"
   },
   "devDependencies": {
