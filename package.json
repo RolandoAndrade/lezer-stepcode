@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "build": "lezer-generator src/stepcode.grammar -o src/parser && rollup -c",
+    "prepare": "npm run build"
+  },
+  "devDependencies": {
+    "@lezer/generator": "^1.5.1",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@lezer/highlight": "^1.2.0"
+  }
+}
