@@ -1,13 +1,29 @@
 {
-  "scripts": {
-    "build": "lezer-generator src/stepcode.grammar -o src/stepcode.ts",
-    "prepare": "npm run build"
+  "name": "stepcode-lang",
+  "version": "1.4.10",
+  "description": "lezer-based StepCode parser",
+  "main": "dist/index.cjs",
+  "type": "module",
+  "exports": {
+    "import": "./dist/index.js",
+    "require": "./dist/index.cjs"
   },
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "license": "MIT",
   "devDependencies": {
-    "@lezer/generator": "^1.5.1",
-    "typescript": "^5.3.3"
+    "rollup": "^2.52.2",
+    "@lezer/generator": "^1.5.1"
   },
   "dependencies": {
     "@lezer/highlight": "^1.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/RolandoAndrade/stepcode-lang"
+  },
+  "scripts": {
+    "build": "lezer-generator src/stepcode.grammar -o src/parser && rollup.config.js -c",
+    "prepare": "npm run build"
   }
 }

@@ -263,3 +263,5 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
     "hasta que" , "Hasta que" , "Hasta Que", identifier
   }
 }
+
+@external propSource stepcode from "./highlight"
