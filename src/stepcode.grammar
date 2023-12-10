@@ -5,6 +5,7 @@
   intersection @left,
   union @left,
   typeExtends @right,
+  elif @right,
   else @right,
   member,
   readonly,
@@ -29,7 +30,25 @@
   predicate
 }
 
-@top Script { ProgramDefinition }
+@top Script { subrutines* ProgramDefinition subrutines* }
+
+subrutines {
+   Procedure
+}
+
+Procedure {
+  subproceso ProcedureName { identifier } ParamList?
+    ~Block
+  finsubproceso
+}
+
+VariableParam {
+  VariableName (como VariableType)?
+}
+
+ParamList {
+  "(" commaSep<VariableParam>? ")"
+}
 
 ProgramDefinition[@isGroup=Program]{
   ProgramHeader { proceso ProgramName { identifier }}
@@ -42,7 +61,7 @@ Block {
 }
 
 statements[@isGroup=Statement] {
-  simpleStatement
+  simpleStatement | compoundStatement
 }
 
 simpleStatement {
@@ -50,7 +69,7 @@ simpleStatement {
     definir Variables { commaSep<VariableDefinition{VariableName}> } como VariableType semi
   } |
   WriteStatement {
-    escribir commaSep<String | VariableName> semi
+    escribir commaSep<expression> semi
   } |
   ReadStatement {
     leer commaSep<VariableName> semi
@@ -58,12 +77,77 @@ simpleStatement {
   ExpressionStatement { expression semi }
 }
 
+compoundStatement {
+  IfStatement {
+    si expression entonces
+      Block
+    (!else sino !elif(si expression entonces)? Block)*
+    !elif finsi+
+  } |
+  SwitchStatement {
+    segun expression hacer
+      SwitchBody {
+          caseItem
+      }
+    finsegun
+  } |
+  WhileStatement {
+    mientras expression hacer
+      Block
+    finmientras
+  } |
+  ForStatement {
+    para AssignmentExpression hasta expression Step{(WithStep expression)}? hacer
+      Block
+    finpara
+  } |
+  RepeatStatement {
+    repetir
+      Block
+    (mientrasque | hastaque) expression
+  }
+}
+
+mientrasque[@name=mientrasque] {
+  "mientras que" | "Mientras que" | "Mientras Que"
+}
+
+hastaque[@name=hastaque] {
+  "hasta que" | "Hasta que" | "Hasta Que"
+}
+
+WithStep {
+  "Con paso" | "Con Paso" | "con paso"
+}
+
+caseItem {
+  CaseLabel { (expression | otherwise ) ":" }
+  Statement { statements }*
+  caseItem?
+}
+
+otherwise{
+  "De otro modo" | "de otro modo"
+}
+
 expression[@isGroup=Expression] {
   Number | String |
   BinaryExpression |
   VariableName |
   AssignmentExpression |
-  ParenthesizedExpression
+  ParenthesizedExpression | MemberExpression | CallExpression
+}
+
+CallExpression {
+  expression !call ArgList
+}
+
+ArgList {
+  "(" commaSep<expression>? ")"
+}
+
+MemberExpression {
+  expression !member "[" expression "]"
 }
 
 BinaryExpression {
@@ -77,7 +161,7 @@ BinaryExpression {
 }
 
 AssignmentExpression {
-  VariableName !assign "←" expression
+  (VariableName | MemberExpression) !assign "←" expression
 }
 
 ParenthesizedExpression { "(" expression ")" }
@@ -105,6 +189,21 @@ semi {
 @skip { spaces | newline | Comment }
 
 commaSep<expr> { expr ("," expr)* ","? }
+kw<term> { @specialize[@name={term}]<identifier, term> }
+
+@external specialize {identifier} keywords from "./tokens" {
+    proceso[@name=proceso], finproceso[@name=finproceso],
+    definir[@name=definir], como[@name=como],
+    escribir[@name=escribir], leer[@name=leer],
+    si[@name=si], entonces[@name=entonces], finsi[@name=finsi], sino[@name=sino],
+    segun[@name=segun], hacer[@name=hacer], finsegun[@name=finsegun],
+    entero[@name=entero], real[@name=real], logico[@name=logico], cadena[@name=cadena], caracter[@name=caracter],
+    mod[@name=ArithOp], div[@name=ArithOp],
+    mientras[@name=mientras], finmientras[@name=finmientras],
+    para[@name=para], finpara[@name=finpara], hasta[@name=hasta],
+    repetir[@name=repetir], subproceso[@name=subproceso],
+    finsubproceso[@name=finsubproceso]
+}
 
 @tokens {
   spaces { @whitespace+ }
@@ -113,8 +212,10 @@ commaSep<expr> { expr ("," expr)* ","? }
   identifierChar { @asciiLetter | $[_$\u{a1}-\u{10ffff}] }
   word { identifierChar (identifierChar | @digit)* }
   identifier { word }
+
   @precedence { spaces, newline, identifier }
   @precedence { spaces, newline, word }
+  @precedence { CaseLabel, ExpressionStatement }
 
   Number {
     (@digit ("_" | @digit)* ("." ("_" | @digit)*)? | "." @digit ("_" | @digit)*)
@@ -130,19 +231,14 @@ commaSep<expr> { expr ("," expr)* ","? }
   LogicOp<expr> { expr }
   CompareOp<expr> { expr }
 
-  @precedence { ArithOp, Comment }
+  @precedence { Comment, ArithOp }
   @precedence { LogicOp, identifier }
   @precedence { CompareOp, identifier}
   @precedence { "←", identifier }
-}
-
-
-@external specialize {identifier} keywords from "./tokens" {
-    proceso[@name=proceso], finproceso[@name=finproceso],
-    definir[@name=definir], como[@name=como],
-    escribir[@name=escribir], leer[@name=leer],
-    si[@name=si], entonces[@name=entonces], finsi[@name=finsi], sino[@name=sino],
-    segun[@name=segun], hacer[@name=hacer], finsegun[@name=finsegun],
-    entero[@name=entero], real[@name=real], logico[@name=logico], cadena[@name=cadena], caracter[@name=caracter],
-    mod[@name=ArithOp], div[@name=ArithOp]
+  @precedence { "De otro modo", "de otro modo", identifier }
+  @precedence { "Con paso","Con Paso","con paso", identifier}
+  @precedence { "mientras que" , "Mientras que" , "Mientras Que", identifier}
+  @precedence {
+    "hasta que" , "Hasta que" , "Hasta Que", identifier
+  }
 }
