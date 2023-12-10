@@ -2,6 +2,7 @@
   typeargs,
   typeMember,
   typePrefix,
+  param,
   intersection @left,
   union @left,
   typeExtends @right,
@@ -26,24 +27,40 @@
   or @left,
   assign @right,
   comma @left,
+  params @left,
   statement @cut,
   predicate
+  left @left
+  right @right
+  cut @cut
 }
 
 @top Script { subrutines* ProgramDefinition subrutines* }
 
 subrutines {
-   Procedure
+   Procedure | Function | PSeIntFunction
 }
 
 Procedure {
   subproceso ProcedureName { identifier } ParamList?
-    ~Block
+     Block
   finsubproceso
 }
 
+Function {
+  funcion FunctionName { identifier } ParamList? ":" VariableType
+    Block
+  finfuncion
+}
+
+PSeIntFunction {
+  funcion VariableName "←" FunctionName { identifier } ParamList?
+    Block
+  finfuncion
+}
+
 VariableParam {
-  VariableName (como VariableType)?
+  !param VariableName (como VariableType)?
 }
 
 ParamList {
@@ -122,7 +139,7 @@ WithStep {
 
 caseItem {
   CaseLabel { (expression | otherwise ) ":" }
-  Statement { statements }*
+  CaseStatement { statements }*
   caseItem?
 }
 
@@ -136,6 +153,7 @@ expression[@isGroup=Expression] {
   VariableName |
   AssignmentExpression |
   ParenthesizedExpression | MemberExpression | CallExpression
+  | Break { romper } | Continue { continuar } | Return { retornar }
 }
 
 CallExpression {
@@ -202,7 +220,10 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
     mientras[@name=mientras], finmientras[@name=finmientras],
     para[@name=para], finpara[@name=finpara], hasta[@name=hasta],
     repetir[@name=repetir], subproceso[@name=subproceso],
-    finsubproceso[@name=finsubproceso]
+    finsubproceso[@name=finsubproceso],
+    funcion[@name=funcion], finfuncion[@name=finfuncion],
+    romper[@name=romper], continuar[@name=continuar],
+    retornar[@name=retornar]
 }
 
 @tokens {
