@@ -1,5 +1,5 @@
 {
-  "name": "stepcode-lang",
+  "name": "lezer-stepcode",
   "version": "0.1.0",
   "description": "lezer-based StepCode parser",
   "main": "dist/index.cjs",
@@ -21,7 +21,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/RolandoAndrade/stepcode-lang"
+    "url": "https://github.com/RolandoAndrade/lezer-stepcode"
   },
   "scripts": {
     "build": "lezer-generator src/stepcode.grammar -o src/parser && rollup -c",
