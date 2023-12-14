@@ -34,6 +34,10 @@ const keywordsMap = new Map([
   ['romper', terms.romper],
   ['continuar', terms.continuar],
   ['retornar', terms.retornar],
+  ['verdadero', terms._true],
+  ['falso', terms._false],
+  ['true', terms._true],
+  ['false', terms._false],
 ])
 
 export function keywords(name) {

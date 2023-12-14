@@ -138,7 +138,7 @@ WithStep {
 }
 
 caseItem {
-  CaseLabel { (expression | otherwise ) ":" }
+  (CaseLabel { expression ":" } | DefaultLabel { otherwise ":"})
   CaseStatement { statements }*
   caseItem?
 }
@@ -153,7 +153,12 @@ expression[@isGroup=Expression] {
   VariableName |
   AssignmentExpression |
   ParenthesizedExpression | MemberExpression | CallExpression
-  | Break { romper } | Continue { continuar } | Return { retornar }
+  | Break { romper } | Continue { continuar } | Return { retornar } |
+  BoolExpression
+}
+
+BoolExpression {
+  true | false
 }
 
 CallExpression {
@@ -168,14 +173,23 @@ MemberExpression {
   expression !member "[" expression "]"
 }
 
+LogicOr[@name=LogicOp] {
+  @specialize<identifier, "O" | "o">
+}
+
+LogicAnd[@name=LogicOp] {
+  @specialize<identifier, "Y" | "y">
+}
+
+
 BinaryExpression {
   expression !plus ArithOp<"+" | "-"> expression |
   expression !times (ArithOp<"*"|"/"> | div | mod) expression|
   expression !exp ArithOp<"**"|'^'> expression |
   expression !equal CompareOp<"=" | "≠"> expression |
   expression !rel (CompareOp<"<" | "≤" | ">" | "≥">) expression |
-  expression !and LogicOp<"Y"|"y"> expression |
-  expression !or LogicOp<"O"|"o"> expression
+  expression !and LogicAnd expression |
+  expression !or LogicOr expression
 }
 
 AssignmentExpression {
@@ -223,7 +237,7 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
     finsubproceso[@name=finsubproceso],
     funcion[@name=funcion], finfuncion[@name=finfuncion],
     romper[@name=romper], continuar[@name=continuar],
-    retornar[@name=retornar]
+    retornar[@name=retornar], true[@name=BooleanLiteral], false[@name=BooleanLiteral]
 }
 
 @tokens {
@@ -253,7 +267,6 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
   CompareOp<expr> { expr }
 
   @precedence { Comment, ArithOp }
-  @precedence { LogicOp, identifier }
   @precedence { CompareOp, identifier}
   @precedence { "←", identifier }
   @precedence { "De otro modo", "de otro modo", identifier }
@@ -262,6 +275,8 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
   @precedence {
     "hasta que" , "Hasta que" , "Hasta Que", identifier
   }
+
+  "(" ")" "[" "]" "{" "}" "←" ";" "," ":"
 }
 
 @external propSource stepcodeHighlight from "./highlight"
