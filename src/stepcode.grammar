@@ -264,4 +264,4 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
   }
 }
 
-@external propSource stepcode from "./highlight"
+@external propSource stepcodeHighlight from "./highlight"
