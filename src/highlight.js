@@ -2,10 +2,9 @@ import {styleTags, tags as t} from "@lezer/highlight"
 
 export const stepcodeHighlight = styleTags({
   "get set async static": t.modifier,
-  "para mientras hacer si sino entonces segun romper continuar repetir proceso finproceso algoritmo finsi finsegun": t.controlKeyword,
+  "para mientras hacer si sino entonces segun romper continuar repetir proceso finproceso algoritmo finsi finsegun funcion finfuncion subproceso finsubproceso": t.controlKeyword,
   "definir como": t.definitionKeyword,
-  "import export from": t.moduleKeyword,
-  "escribir leer": t.keyword,
+  "escribir leer retornar continuar romper": t.keyword,
   ProgramName: t.definition(t.className),
   TemplateString: t.special(t.string),
   BooleanLiteral: t.bool,
@@ -34,4 +33,5 @@ export const stepcodeHighlight = styleTags({
   'entero real cadena caracter logico': t.typeName,
   TypeDefinition: t.definition(t.typeName),
   DefaultLabel: t.controlKeyword,
+  ParameterPass: t.modifier,
 })

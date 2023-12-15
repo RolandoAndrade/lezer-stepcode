@@ -38,6 +38,10 @@ const keywordsMap = new Map([
   ['falso', terms._false],
   ['true', terms._true],
   ['false', terms._false],
+  ['procedimiento', terms.subproceso],
+  ['finprocedimiento', terms.finsubproceso],
+  ['subalgoritmo', terms.subproceso],
+  ['finsubalgoritmo', terms.finsubproceso],
 ])
 
 export function keywords(name) {

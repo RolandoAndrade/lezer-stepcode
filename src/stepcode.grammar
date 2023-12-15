@@ -60,7 +60,7 @@ PSeIntFunction {
 }
 
 VariableParam {
-  !param VariableName (como VariableType)?
+  !param VariableName (como VariableType)? ParameterPass{(ByReference | ByValue)}?
 }
 
 ParamList {
@@ -137,6 +137,15 @@ WithStep {
   "Con paso" | "Con Paso" | "con paso"
 }
 
+ByReference {
+  "Por referencia" | "por referencia" | "por Referencia" | "Por Referencia"
+}
+
+ByValue {
+  "Por valor" | "por valor" | "por Valor" | "Por Valor"
+}
+
+
 caseItem {
   (CaseLabel { expression ":" } | DefaultLabel { otherwise ":"})
   CaseStatement { statements }*
@@ -153,7 +162,7 @@ expression[@isGroup=Expression] {
   VariableName |
   AssignmentExpression |
   ParenthesizedExpression | MemberExpression | CallExpression
-  | Break { romper } | Continue { continuar } | Return { retornar } |
+  | Break { romper } | Continue { continuar } | Return { retornar expression } |
   BoolExpression
 }
 
@@ -274,6 +283,12 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
   @precedence { "mientras que" , "Mientras que" , "Mientras Que", identifier}
   @precedence {
     "hasta que" , "Hasta que" , "Hasta Que", identifier
+  }
+  @precedence {
+    "Por referencia", "por referencia", "por Referencia", "Por Referencia", identifier
+  }
+  @precedence {
+    "Por valor", "por valor", "por Valor", "Por Valor", identifier
   }
 
   "(" ")" "[" "]" "{" "}" "←" ";" "," ":"
