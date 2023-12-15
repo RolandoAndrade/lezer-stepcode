@@ -14,7 +14,7 @@ export const stepcodeHighlight = styleTags({
   PropertyName: t.propertyName,
   PrivatePropertyName: t.special(t.propertyName),
   "CallExpression/MemberExpression/PropertyName": t.function(t.propertyName),
-  "FunctionDeclaration/VariableDefinition": t.function(t.definition(t.variableName)),
+  "FunctionName ProcedureName": t.function(t.definition(t.variableName)),
   "VariableDefinition": t.definition(t.className),
   "Comment": t.lineComment,
   Number: t.number,
