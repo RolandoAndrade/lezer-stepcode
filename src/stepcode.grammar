@@ -91,7 +91,10 @@ simpleStatement {
   ReadStatement {
     leer commaSep<VariableName> semi
   } |
-  ExpressionStatement { expression semi }
+  ExpressionStatement { expression semi } |
+  DimensionStatment {
+    dimension VariableName "[" expression "]" semi
+  }
 }
 
 compoundStatement {
@@ -253,7 +256,7 @@ kw<term> { @specialize[@name={term}]<identifier, term> }
     finsubproceso[@name=finsubproceso],
     funcion[@name=funcion], finfuncion[@name=finfuncion],
     romper[@name=romper], continuar[@name=continuar],
-    retornar[@name=retornar], true[@name=BooleanLiteral], false[@name=BooleanLiteral]
+    retornar[@name=retornar], true[@name=BooleanLiteral], false[@name=BooleanLiteral], dimension[@name=dimension]
 }
 
 @tokens {
