@@ -222,7 +222,7 @@ VariableName {
 }
 
 VariableType {
-  entero | real | logico | cadena | caracter
+  entero | real | logico | cadena | caracter | expression
 }
 
 
