@@ -1,6 +1,6 @@
 {
   "name": "lezer-stepcode",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "lezer-based StepCode parser",
   "main": "dist/index.cjs",
   "type": "module",

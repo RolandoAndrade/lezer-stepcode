@@ -89,7 +89,7 @@ simpleStatement {
     escribir commaSep<expression> semi
   } |
   ReadStatement {
-    leer commaSep<VariableName> semi
+    leer commaSep<VariableName | MemberExpression> semi
   } |
   ExpressionStatement { expression semi } |
   DimensionStatment {
